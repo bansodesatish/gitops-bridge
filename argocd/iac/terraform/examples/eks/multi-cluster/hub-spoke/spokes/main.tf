@@ -44,6 +44,7 @@ provider "kubernetes" {
     # This requires the awscli to be installed locally where Terraform is executed
     args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", local.region]
   }
+  alias = "incluster"
 }
 
 
@@ -157,7 +158,7 @@ module "gitops_bridge_bootstrap" {
   source = "gitops-bridge-dev/gitops-bridge/helm"
   # The ArgoCD remote cluster secret is deploy on hub cluster not on spoke clusters
   providers = {
-    kubernetes = kubernetes
+    kubernetes = kubernetes.incluster
   }
    cluster = {
     environment  = local.environment
