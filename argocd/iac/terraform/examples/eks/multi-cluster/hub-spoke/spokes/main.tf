@@ -52,6 +52,8 @@ locals {
   name        = "hub-spoke-${terraform.workspace}"
   environment = terraform.workspace
   region      = var.region
+  
+  argocd_namespace = "argocd"
 
   cluster_version = var.kubernetes_version
 
@@ -145,6 +147,23 @@ locals {
   tags = {
     Blueprint  = local.name
     GithubRepo = "github.com/gitops-bridge-dev/gitops-bridge"
+  }
+}
+
+################################################################################
+# GitOps Bridge: Bootstrap
+################################################################################
+module "gitops_bridge_bootstrap" {
+  source = "gitops-bridge-dev/gitops-bridge/helm"
+
+  cluster = {
+    cluster_name = module.eks.cluster_name
+    environment  = local.environment
+    metadata     = local.addons_metadata
+    addons       = local.addons
+  }
+  argocd = {
+    namespace = local.argocd_namespace
   }
 }
 
