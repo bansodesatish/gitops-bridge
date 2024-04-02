@@ -155,7 +155,10 @@ locals {
 ################################################################################
 module "gitops_bridge_bootstrap" {
   source = "gitops-bridge-dev/gitops-bridge/helm"
-
+  # The ArgoCD remote cluster secret is deploy on hub cluster not on spoke clusters
+  providers = {
+    kubernetes = kubernetes
+  }
    cluster = {
     environment  = local.environment
     metadata     = local.addons_metadata
