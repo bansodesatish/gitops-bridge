@@ -4,7 +4,7 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" {}
 
-provider "bcrypt" {}
+# provider "bcrypt" {}
 
 provider "helm" {
   kubernetes {
@@ -155,7 +155,7 @@ module "gitops_bridge_bootstrap" {
     set_sensitive = [
       {
         name  = "configs.secret.argocdServerAdminPassword"
-        value = bcrypt_hash.argo.id
+        value = bcrypt(random_password.argocd.result) #bcrypt_hash.argo.id
       }
     ]
   }
@@ -173,9 +173,9 @@ resource "random_password" "argocd" {
 
 # Argo requires the password to be bcrypt, we use custom provider of bcrypt,
 # as the default bcrypt function generates diff for each terraform plan
-resource "bcrypt_hash" "argo" {
-  cleartext = random_password.argocd.result
-}
+# resource "bcrypt_hash" "argo" {
+#   cleartext = random_password.argocd.result
+# }
 
 #tfsec:ignore:aws-ssm-secret-use-customer-key
 resource "aws_secretsmanager_secret" "argocd" {
