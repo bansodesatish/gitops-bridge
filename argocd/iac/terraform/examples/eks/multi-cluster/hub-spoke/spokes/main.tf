@@ -162,7 +162,7 @@ module "gitops_bridge_bootstrap" {
     kubernetes = kubernetes.incluster
   }
 
-  install = false # We are not installing argocd via helm on hub cluster
+  install = true # We are not installing argocd via helm on hub cluster
   cluster = {
     cluster_name = module.eks.cluster_name
     environment  = local.environment
