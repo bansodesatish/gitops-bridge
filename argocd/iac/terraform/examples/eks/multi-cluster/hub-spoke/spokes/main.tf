@@ -156,17 +156,31 @@ locals {
 ################################################################################
 module "gitops_bridge_bootstrap" {
   source = "github.com/gitops-bridge-dev/gitops-bridge-argocd-bootstrap-terraform?ref=v2.0.0"
+
   # The ArgoCD remote cluster secret is deploy on hub cluster not on spoke clusters
   providers = {
     kubernetes = kubernetes.incluster
   }
-   cluster = {
+
+  install = false # We are not installing argocd via helm on hub cluster
+  cluster = {
+    cluster_name = module.eks.cluster_name
     environment  = local.environment
     metadata     = local.addons_metadata
     addons       = local.addons
-  }
-  argocd = {
-    namespace = local.argocd_namespace
+    server       = module.eks.cluster_endpoint
+    config       = <<-EOT
+      {
+        "tlsClientConfig": {
+          "insecure": false,
+          "caData" : "${module.eks.cluster_certificate_authority_data}"
+        },
+        "awsAuthConfig" : {
+          "clusterName": "${module.eks.cluster_name}",
+          "roleARN": "${aws_iam_role.spoke.arn}"
+        }
+      }
+    EOT
   }
 }
 
